@@ -1,8 +1,9 @@
 from django.db import models
 from django.utils.text import slugify
+from common.mixins import TimeStampMixin
 
 
-class Category(models.Model):
+class Category(TimeStampMixin):
     """
     Product Category
     Example:
@@ -29,13 +30,6 @@ class Category(models.Model):
         default=True,
     )
 
-    created_at = models.DateTimeField(
-        auto_now_add=True,
-    )
-
-    updated_at = models.DateTimeField(
-        auto_now=True,
-    )
 
     class Meta:
         db_table = "categories"
@@ -98,10 +92,7 @@ class Brand(models.Model):
         return self.name
 
 
-class Product(models.Model):
-    """
-    Product Model
-    """
+class Product(TimeStampMixin):
 
     category = models.ForeignKey(
         Category,
@@ -125,27 +116,52 @@ class Product(models.Model):
     )
 
     sku = models.CharField(
-        max_length=50,
+        max_length=100,
         unique=True,
     )
 
+    short_description = models.CharField(
+        max_length=255,
+    )
+
     description = models.TextField()
+
+    base_price = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+    )
 
     price = models.DecimalField(
         max_digits=10,
         decimal_places=2,
     )
 
+    stock = models.PositiveIntegerField(
+        default=0,
+    )
+
+    weight = models.DecimalField(
+        max_digits=8,
+        decimal_places=2,
+        null=True,
+        blank=True,
+    )
+
+    is_featured = models.BooleanField(
+        default=False,
+    )
+
     is_active = models.BooleanField(
         default=True,
     )
 
-    created_at = models.DateTimeField(
-        auto_now_add=True,
+    meta_title = models.CharField(
+        max_length=255,
+        blank=True,
     )
 
-    updated_at = models.DateTimeField(
-        auto_now=True,
+    meta_description = models.TextField(
+        blank=True,
     )
 
     class Meta:
@@ -161,3 +177,42 @@ class Product(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class ProductImage(TimeStampMixin):
+    """
+    Stores multiple images for a product.
+    """
+
+    product = models.ForeignKey(
+        Product,
+        on_delete=models.CASCADE,
+        related_name="images",
+    )
+
+    image = models.ImageField(
+        upload_to="products/",
+    )
+
+    alt_text = models.CharField(
+        max_length=255,
+        blank=True,
+    )
+
+    display_order = models.PositiveIntegerField(
+        default=1,
+    )
+
+    is_primary = models.BooleanField(
+        default=False,
+    )
+
+    class Meta:
+        db_table = "product_images"
+        ordering = [
+            "display_order",
+            "id",
+        ]
+
+    def __str__(self):
+        return f"{self.product.name} Image"

@@ -1,0 +1,8 @@
+DEFAULT_PAGE_SIZE = 10
+MAX_PAGE_SIZE = 100
+
+ACTIVE = True
+INACTIVE = False
+
+STATUS_SUCCESS = "success"
+STATUS_FAILED = "failed"

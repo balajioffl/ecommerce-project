@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Category, Brand, Product
+from .models import Category, Brand, Product, ProductImage
 
 
 @admin.register(Category)
@@ -122,4 +122,28 @@ class ProductAdmin(admin.ModelAdmin):
     autocomplete_fields = (
         "category",
         "brand",
+    )
+
+
+@admin.register(ProductImage)
+class ProductImageAdmin(admin.ModelAdmin):
+
+    list_display = (
+        "id",
+        "product",
+        "display_order",
+        "is_primary",
+    )
+
+    list_filter = (
+        "is_primary",
+    )
+
+    search_fields = (
+        "product__name",
+    )
+
+    ordering = (
+        "product",
+        "display_order",
     )

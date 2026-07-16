@@ -25,3 +25,6 @@ dist/
 
 # Docker
 *.pid
+
+# media upload
+media/

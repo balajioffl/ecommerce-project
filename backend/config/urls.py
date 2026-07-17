@@ -27,6 +27,11 @@ urlpatterns = [
         "api/", 
         include("products.urls")
     ),
+
+    path(
+        "api/",
+        include("inventory.urls"),
+    )
 ]
 
 if settings.DEBUG:

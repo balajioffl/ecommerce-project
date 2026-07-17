@@ -115,37 +115,11 @@ class Product(TimeStampMixin):
         blank=True,
     )
 
-    sku = models.CharField(
-        max_length=100,
-        unique=True,
-    )
-
     short_description = models.CharField(
         max_length=255,
     )
 
     description = models.TextField()
-
-    base_price = models.DecimalField(
-        max_digits=10,
-        decimal_places=2,
-    )
-
-    price = models.DecimalField(
-        max_digits=10,
-        decimal_places=2,
-    )
-
-    stock = models.PositiveIntegerField(
-        default=0,
-    )
-
-    weight = models.DecimalField(
-        max_digits=8,
-        decimal_places=2,
-        null=True,
-        blank=True,
-    )
 
     is_featured = models.BooleanField(
         default=False,
@@ -216,3 +190,211 @@ class ProductImage(TimeStampMixin):
 
     def __str__(self):
         return f"{self.product.name} Image"
+
+
+class Attribute(models.Model):
+    """
+    Product Attribute
+
+    Examples:
+        Color
+        Size
+        Storage
+        RAM
+        Material
+    """
+
+    name = models.CharField(
+        max_length=100,
+        unique=True,
+    )
+
+    is_active = models.BooleanField(
+        default=True,
+    )
+
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+    )
+
+    class Meta:
+        db_table = "attributes"
+        ordering = ["name"]
+
+    def __str__(self):
+        return self.name
+
+
+class AttributeValue(models.Model):
+    """
+    Attribute Values
+
+    Examples:
+
+    Color
+        Black
+        White
+        Blue
+
+    Storage
+        128GB
+        256GB
+
+    Size
+        S
+        M
+        L
+    """
+
+    attribute = models.ForeignKey(
+        Attribute,
+        on_delete=models.CASCADE,
+        related_name="values",
+    )
+
+    value = models.CharField(
+        max_length=100,
+    )
+
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+    )
+
+    class Meta:
+        db_table = "attribute_values"
+
+        ordering = [
+            "attribute",
+            "value",
+        ]
+
+        unique_together = (
+            "attribute",
+            "value",
+        )
+
+    def __str__(self):
+        return f"{self.attribute.name} : {self.value}"
+
+
+class ProductVariant(models.Model):
+    """
+    Sellable variant of a product.
+
+    Example:
+
+    Product : iPhone 16
+
+    Variant 1:
+        Black
+        128 GB
+
+    Variant 2:
+        Black
+        256 GB
+
+    Variant 3:
+        Blue
+        128 GB
+    """
+
+    product = models.ForeignKey(
+        Product,
+        on_delete=models.CASCADE,
+        related_name="variants",
+    )
+
+    sku = models.CharField(
+        max_length=100,
+        unique=True,
+    )
+
+    barcode = models.CharField(
+        max_length=100,
+        blank=True,
+    )
+
+    price = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+    )
+
+    stock = models.PositiveIntegerField(
+        default=0,
+    )
+
+    weight = models.DecimalField(
+        max_digits=8,
+        decimal_places=2,
+        null=True,
+        blank=True,
+    )
+
+    is_active = models.BooleanField(
+        default=True,
+    )
+
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+    )
+
+    updated_at = models.DateTimeField(
+        auto_now=True,
+    )
+
+    class Meta:
+        db_table = "product_variants"
+
+        ordering = [
+            "product",
+            "sku",
+        ]
+
+    def __str__(self):
+        return f"{self.product.name} - {self.sku}"
+
+
+class VariantAttribute(models.Model):
+    """
+    Connects a Product Variant with its Attribute Values.
+
+    Example:
+
+    Variant:
+        iPhone Black 128GB
+
+    Attributes:
+        Color   -> Black
+        Storage -> 128GB
+    """
+
+    variant = models.ForeignKey(
+        ProductVariant,
+        on_delete=models.CASCADE,
+        related_name="attributes",
+    )
+
+    attribute_value = models.ForeignKey(
+        AttributeValue,
+        on_delete=models.CASCADE,
+        related_name="variant_attributes",
+    )
+
+    class Meta:
+        db_table = "variant_attributes"
+
+        ordering = [
+            "variant",
+        ]
+
+        unique_together = (
+            "variant",
+            "attribute_value",
+        )
+
+    def __str__(self):
+        return (
+            f"{self.variant.sku} - "
+            f"{self.attribute_value.attribute.name}: "
+            f"{self.attribute_value.value}"
+        )

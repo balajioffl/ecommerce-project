@@ -1,8 +1,16 @@
 import os
 from rest_framework import serializers
 
-from .models import Category, Brand, Product, ProductImage
-
+from .models import (
+    Category,
+    Brand,
+    Product,
+    ProductImage,
+    Attribute,
+    AttributeValue,
+    ProductVariant,
+    VariantAttribute,
+)
 
 class CategorySerializer(serializers.ModelSerializer):
 
@@ -18,6 +26,69 @@ class BrandSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
+class ProductImageNestedSerializer(serializers.ModelSerializer):
+    """
+    Used inside ProductSerializer.
+    """
+
+    class Meta:
+        model = ProductImage
+
+        fields = (
+            "id",
+            "image",
+            "alt_text",
+            "display_order",
+            "is_primary",
+        )
+
+
+class VariantAttributeNestedSerializer(serializers.ModelSerializer):
+    """
+    Used inside Product Variant.
+    """
+
+    attribute = serializers.CharField(
+        source="attribute_value.attribute.name",
+        read_only=True,
+    )
+
+    value = serializers.CharField(
+        source="attribute_value.value",
+        read_only=True,
+    )
+
+    class Meta:
+        model = VariantAttribute
+
+        fields = (
+            "attribute",
+            "value",
+        )
+
+
+class ProductVariantNestedSerializer(serializers.ModelSerializer):
+    """
+    Used inside ProductSerializer.
+    """
+
+    attributes = VariantAttributeNestedSerializer(
+        many=True,
+        read_only=True,
+    )
+
+    class Meta:
+        model = ProductVariant
+
+        fields = (
+            "id",
+            "sku",
+            "barcode",
+            "price",
+            "stock",
+            "weight",
+            "attributes",
+        )
 class ProductSerializer(serializers.ModelSerializer):
     """
     Serializer for Product.
@@ -33,6 +104,16 @@ class ProductSerializer(serializers.ModelSerializer):
         read_only=True,
     )
 
+    images = ProductImageNestedSerializer(
+        many=True,
+        read_only=True,
+    )
+
+    variants = ProductVariantNestedSerializer(
+        many=True,
+        read_only=True,
+    )
+
     class Meta:
         model = Product
 
@@ -44,12 +125,13 @@ class ProductSerializer(serializers.ModelSerializer):
             "brand_name",
             "name",
             "slug",
-            "sku",
+            "short_description",
             "description",
-            "price",
             "is_active",
             "created_at",
             "updated_at",
+            "images",
+            "variants",
         )
 
         read_only_fields = (
@@ -58,7 +140,6 @@ class ProductSerializer(serializers.ModelSerializer):
             "created_at",
             "updated_at",
         )
-
 
 class ProductImageSerializer(serializers.ModelSerializer):
     """
@@ -170,3 +251,124 @@ class ProductImageSerializer(serializers.ModelSerializer):
             instance,
             validated_data,
         )
+
+
+class AttributeSerializer(serializers.ModelSerializer):
+    """
+    Serializer for Product Attributes.
+    """
+
+    class Meta:
+        model = Attribute
+
+        fields = (
+            "id",
+            "name",
+            "is_active",
+            "created_at",
+        )
+
+        read_only_fields = (
+            "id",
+            "created_at",
+        )
+
+
+class AttributeValueSerializer(serializers.ModelSerializer):
+    """
+    Serializer for Attribute Values.
+    """
+
+    attribute_name = serializers.CharField(
+        source="attribute.name",
+        read_only=True,
+    )
+
+    class Meta:
+        model = AttributeValue
+
+        fields = (
+            "id",
+            "attribute",
+            "attribute_name",
+            "value",
+            "created_at",
+        )
+
+        read_only_fields = (
+            "id",
+            "created_at",
+        )
+
+
+class ProductVariantSerializer(serializers.ModelSerializer):
+    """
+    Serializer for Product Variants.
+    """
+
+    product_name = serializers.CharField(
+        source="product.name",
+        read_only=True,
+    )
+
+    class Meta:
+        model = ProductVariant
+
+        fields = (
+            "id",
+            "product",
+            "product_name",
+            "sku",
+            "barcode",
+            "price",
+            "stock",
+            "weight",
+            "is_active",
+            "created_at",
+            "updated_at",
+        )
+
+        read_only_fields = (
+            "id",
+            "created_at",
+            "updated_at",
+        )
+
+
+class VariantAttributeSerializer(serializers.ModelSerializer):
+    """
+    Serializer for Variant Attributes.
+    """
+
+    sku = serializers.CharField(
+        source="variant.sku",
+        read_only=True,
+    )
+
+    attribute = serializers.CharField(
+        source="attribute_value.attribute.name",
+        read_only=True,
+    )
+
+    value = serializers.CharField(
+        source="attribute_value.value",
+        read_only=True,
+    )
+
+    class Meta:
+        model = VariantAttribute
+
+        fields = (
+            "id",
+            "variant",
+            "sku",
+            "attribute_value",
+            "attribute",
+            "value",
+        )
+
+        read_only_fields = (
+            "id",
+        )
+
+

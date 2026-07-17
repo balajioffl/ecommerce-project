@@ -28,7 +28,7 @@ THIRD_PARTY_APPS = [
     "drf_spectacular",
 ]
 
-LOCAL_APPS = ["accounts", "products", "common", "inventory"]
+LOCAL_APPS = ["accounts", "products", "common", "inventory", "cart"]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 

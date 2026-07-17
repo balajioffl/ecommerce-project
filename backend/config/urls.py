@@ -31,7 +31,12 @@ urlpatterns = [
     path(
         "api/",
         include("inventory.urls"),
-    )
+    ),
+
+    path(
+        "api/",
+        include("cart.urls"),
+    ),
 ]
 
 if settings.DEBUG:

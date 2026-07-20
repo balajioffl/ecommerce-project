@@ -28,7 +28,7 @@ THIRD_PARTY_APPS = [
     "drf_spectacular",
 ]
 
-LOCAL_APPS = ["accounts", "products", "common", "inventory", "cart"]
+LOCAL_APPS = ["accounts", "products", "common", "inventory", "cart", "orders", "payments"]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 
@@ -129,13 +129,9 @@ REST_FRAMEWORK = {
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
     "PAGE_SIZE": 10,
-
-
     "DEFAULT_PAGINATION_CLASS": "common.pagination.DefaultPagination",
     "PAGE_SIZE": 10,
-
     "EXCEPTION_HANDLER": "common.exceptions.custom_exception_handler",
-    
 }
 
 

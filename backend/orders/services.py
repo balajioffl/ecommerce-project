@@ -4,6 +4,9 @@ from .models import Order, OrderItem, ShippingAddress
 from uuid import uuid4
 from payments.services import PaymentService
 
+from decimal import Decimal
+from coupons.services import CouponService
+
 
 class CheckoutService:
 
@@ -38,10 +41,24 @@ class CheckoutService:
 
                 raise ValueError(f"Insufficient stock for {item.variant.sku}")
 
-        subtotal = 0
+        # coupon add
+
+        subtotal = Decimal("0.00")
 
         for item in cart.items.all():
             subtotal += item.quantity * item.price_at_added
+
+        discount = Decimal("0.00")
+        coupon = None
+
+        coupon_code = shipping_data.get("coupon_code")
+
+        if coupon_code:
+
+            coupon, discount = CouponService.apply_coupon(
+                coupon_code,
+                subtotal,
+            )
 
         # create order
 
@@ -49,11 +66,22 @@ class CheckoutService:
             user=user,
             order_number=CheckoutService.generate_order_number(),
             subtotal=subtotal,
-            tax_amount=0,
-            shipping_charge=0,
-            discount_amount=0,
-            total_amount=subtotal,
+            tax_amount=Decimal("0.00"),
+            shipping_charge=Decimal("0.00"),
+            discount_amount=discount,
+            total_amount=(subtotal - discount),
+            coupon=coupon,
         )
+
+        if coupon:
+
+            coupon.used_count += 1
+
+            coupon.save(
+                update_fields=[
+                    "used_count",
+                ]
+            )
 
         for item in cart.items.select_related("variant"):
 
@@ -84,14 +112,11 @@ class CheckoutService:
                 "India",
             ),
         )
-        
+
         PaymentService.create_payment(
             order=order,
-            payment_method=shipping_data[
-                "payment_method"
-                ],
+            payment_method=shipping_data["payment_method"],
         )
-
 
         for item in cart.items.select_related("variant"):
 

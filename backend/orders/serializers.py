@@ -132,3 +132,8 @@ class CheckoutSerializer(serializers.Serializer):
             "STRIPE",
         ]
     )
+
+    coupon_code = serializers.CharField(
+        required=False,
+        allow_blank=True,
+    )

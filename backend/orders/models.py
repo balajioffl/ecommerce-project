@@ -1,10 +1,6 @@
 from django.db import models
-
-# Create your models here.
-from django.db import models
-
 from common.mixins import TimeStampMixin
-
+from coupons.models import Coupon
 
 class Order(TimeStampMixin):
     """
@@ -64,6 +60,14 @@ class Order(TimeStampMixin):
         max_digits=12,
         decimal_places=2,
         default=0,
+    )
+
+    coupon = models.ForeignKey(
+        Coupon,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="orders",
     )
 
     notes = models.TextField(

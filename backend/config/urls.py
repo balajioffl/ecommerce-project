@@ -42,6 +42,11 @@ urlpatterns = [
         "api/orders/",
         include("orders.urls"),
     ),
+
+    path(
+        "api/",
+        include("coupons.urls"),
+    )
     
 ]
 
